@@ -2,7 +2,7 @@
 
 ## Deskripsi
 
-Program ini adalah sebuah REST API yang dibangun menggunakan bahasa pemrograman Go dan framework Gin. API ini mengambil data provinsi dari sumber eksternal (API publik), menyimpannya ke database MySQL, lalu menyajikannya dalam format JSON melalui endpoint.
+Program ini adalah sebuah REST API yang dibangun menggunakan bahasa pemrograman Go dan framework Gin. API ini mengambil data provinsi dari sumber eksternal (API publik), menyimpannya ke database MySQL, lalu mengularkan output dalam format JSON.
 
 ## 1. Koneksi ke Database
 
