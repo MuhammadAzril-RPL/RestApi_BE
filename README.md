@@ -6,6 +6,18 @@ Program ini adalah sebuah REST API yang dibangun menggunakan bahasa pemrograman 
 
 ## 1. Koneksi ke Database
 
+query sql :
+```sql
+CREATE DATABASE IF NOT EXISTS wilayahs;
+USE wilayahs;
+
+CREATE TABLE  provinces (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(10) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL
+);
+
+```
 Program pertaa-tama mencoba terhubung ke database MySQL menggunakan perintah:
 ```go
 database, error := sql.Open("mysql", "Azril:Myboo5456@tcp(localhost:3307)/wilayahs")
