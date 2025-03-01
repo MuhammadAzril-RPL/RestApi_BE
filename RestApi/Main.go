@@ -29,13 +29,9 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-
-	// Membuat router dengan Gin framework
 	router := gin.Default()
-
-	// Endpoint GET /province
 	router.GET("/province", func(c *gin.Context) {
-		// Mengambil data dari database
+	
 		rows, err := db.Query("SELECT id, code, name FROM provinces")
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -52,16 +48,12 @@ func main() {
 			}
 			province = append(province, p)
 		}
-
-		// Menyiapkan respons
 		response := APIResponse{
 			Status:  "sukses",
 			Code:    200,
 			Message: "Berhasil mendapatkan data",
 			Data:    province,
 		}
-
-		// Mengirim respons dalam format JSON
 		c.JSON(http.StatusOK, response)
 	})
 
