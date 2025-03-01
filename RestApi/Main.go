@@ -2,12 +2,18 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
+
+type ProvinceAPI struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
 
 type Province struct {
 	ID   int    `json:"id"`
@@ -23,42 +29,61 @@ type APIResponse struct {
 }
 
 func main() {
-	
-	db, err := sql.Open("mysql", "Azril:Myboo5456@tcp(localhost:3307)/wilayahs")
-	if err != nil {
-		log.Fatal(err)
+	database, error := sql.Open("mysql", "Azril:Myboo5456@tcp(localhost:3307)/wilayahs")
+	if error != nil {
+		log.Fatal(error)
 	}
-	defer db.Close()
+	defer database.Close()
+
+	response, error := http.Get("https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json")
+	if error != nil {
+		log.Fatal(error)
+	}
+	defer response.Body.Close()
+
+	var provincesAPIList []ProvinceAPI
+	if error := json.NewDecoder(response.Body).Decode(&provincesAPIList); error != nil {
+		log.Fatal(error)
+	}
+
+	for _, province := range provincesAPIList {
+		_, error := database.Exec("INSERT INTO provinces (code, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name)", province.ID, province.Name)
+		if error != nil {
+			log.Println("Error inserting:", error)
+		}
+	}
+
 	router := gin.Default()
-	router.GET("/province", func(c *gin.Context) {
-	
-		rows, err := db.Query("SELECT id, code, name FROM provinces")
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+	router.GET("/province", func(context *gin.Context) {
+		rows, error := database.Query("SELECT id, code, name FROM provinces")
+		if error != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": error.Error()})
 			return
 		}
 		defer rows.Close()
 
-		var province []Province
+		var provincesList []Province
 		for rows.Next() {
-			var p Province
-			if err := rows.Scan(&p.ID, &p.Code, &p.Name); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			var province Province
+			if error := rows.Scan(&province.ID, &province.Code, &province.Name); error != nil {
+				context.JSON(http.StatusInternalServerError, gin.H{"error": error.Error()})
 				return
 			}
-			province = append(province, p)
+			provincesList = append(provincesList, province)
 		}
-		response := APIResponse{
-			Status:  "sukses",
+
+		apiResponse := APIResponse{
+			Status:  "success",
 			Code:    200,
-			Message: "Berhasil mendapatkan data",
-			Data:    province,
+			Message: "Successfully get data",
+			Data:    provincesList,
 		}
-		c.JSON(http.StatusOK, response)
+		context.JSON(http.StatusOK, apiResponse)
 	})
 
 	log.Println("Server berjalan di http://localhost:8000")
-	if err := router.Run(":8000"); err != nil {
-		log.Fatal(err)
+	if error := router.Run(":8000"); error != nil {
+		log.Fatal(error)
 	}
 }
