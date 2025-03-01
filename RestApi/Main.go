@@ -23,7 +23,7 @@ type APIResponse struct {
 }
 
 func main() {
-	// Koneksi database
+	
 	db, err := sql.Open("mysql", "Azril:Myboo5456@tcp(localhost:3307)/wilayahs")
 	if err != nil {
 		log.Fatal(err)
